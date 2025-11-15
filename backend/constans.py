@@ -1,0 +1,1 @@
+SQL_DB__URL = 'sqlite:///./notdb.db'
