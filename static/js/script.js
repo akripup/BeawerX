@@ -1,3 +1,4 @@
+// AJAX запросы к API
 async function loadUsers() {
     try {
         const response = await fetch('/api/users');

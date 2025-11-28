@@ -3,28 +3,13 @@ from src.famodels import PostModel, UserModel, PostCreate, UserCreate
 from datetime import datetime
 from typing import Optional, List
 from fastapi import FastAPI, HTTPException, Query, Depends
-from starlette.responses import JSONResponse
 from sqlalchemy.orm import Session
 from src.main import get_db
 from src.dbmodels import DBPostModel, DBUserModel
 
-
 app = FastAPI()
 #TODO
 #Добавить аннотации для макс длинны символов
-#TODO
-user1 = UserModel(id = 1, user_name='Firkita', login='qwerty', age=5)
-user2 = UserModel(id = 2, user_name='Major Fyrkins', login='qwerty1',
-                   avatar_url='https://i.pinimg.com/736x/a1/b7/b9/a1b7b9956ee8f0b51a10a13d108d5d5f.jpg')
-user3 = UserModel(id = 3, user_name='Missis B', login='qwerty2', life_status='Raise up ur firkalka')
-users = [user1, user2, user3]
-date1 =datetime.strptime('01.01.1991', '%d.%m.%Y')
-date2 =datetime.strptime('01.01.1991', '%d.%m.%Y')
-date3 =datetime.strptime('02.01.1991', '%d.%m.%Y')
-posts1 = PostModel(id = 1, author=user1, date=date1, title = 'Shock! Read to the end!', body = 'snort, snort, snort, snort!!')
-posts2 = PostModel(id = 2, author=user2, date=date2, title = 'Snort', body = 'fir fir fir')
-posts3 = PostModel(id = 3, author=user3, date=date3, title = 'SNORT!!!', body = 'fir snort, snort snort snort')
-posts = [posts1, posts2, posts3]
 
 
 @app.get("/api/feed")
