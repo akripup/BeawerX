@@ -1,4 +1,5 @@
 '''В этом модуле описана логика обработки api запросов'''
+from fastapi.middleware.cors import CORSMiddleware
 from src.famodels import PostModel, UserModel, PostCreate, UserCreate
 from datetime import datetime
 from typing import Optional, List
@@ -12,14 +13,33 @@ app = FastAPI()
 #Добавить аннотации для макс длинны символов
 
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000"],  # Адреса фронтенда
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# получаем ленту новостей
 @app.get("/api/feed")
-async def get_feed():
-    return 
+async def get_feeddb(db: Session = Depends(get_db)) -> List[PostModel]:
+    db_posts = db.query(DBPostModel)
+    # Ищем самые новые посты
+    db_posts.order_by(DBPostModel.date.desc())
+    # сколько постов выводить в ленте
+    db_posts.limit(10)
+
+    # ошибка если нет постов
+    if db_posts is None:
+        raise HTTPException(status_code=404, detail= 'Пользователь не найден')
+    
+    return db_posts
 
 #TODO возможно следует изменить формат даты
 @app.get("/api/search_post")
 async def search_post(author_name: Optional[str] = Query(None, description= 'Имя автора поста'),
-                    creation_date: Optional[datetime] = Query(None, description= 'Дата публикации поста в формате dd.mm.YYYY', example="01.01.1991"),
+                    creation_date: Optional[datetime] = Query(None, description= 'Дата публикации поста в формате dd.mm.YYYY', examples ="01.01.1991"),
                     post_title:  Optional[str] = Query(None, description= 'Заголовок поста'),
                     db: Session = Depends(get_db)
                     ) -> List[PostModel]:
@@ -45,7 +65,8 @@ async def search_post(author_name: Optional[str] = Query(None, description= 'И�
     return db_posts
 
 @app.post("/api/create_post", response_model=PostModel)
-async def create_post(new_post: PostCreate, db: Session = Depends(get_db)) -> PostModel:
+async def create_post(new_post: PostCreate,
+                    db: Session = Depends(get_db)) -> PostModel:
     db_user = db.query(DBUserModel).filter(DBUserModel.login == new_post.author_login).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail= 'Пользователь не найден')
@@ -61,7 +82,8 @@ async def create_post(new_post: PostCreate, db: Session = Depends(get_db)) -> Po
     return db_post
 
 @app.post("/api/create_user", response_model= UserModel)
-async def create_user(new_user: UserCreate, db: Session = Depends(get_db)) -> UserModel:
+async def create_user(new_user: UserCreate, 
+                    db: Session = Depends(get_db)) -> UserModel:
     db_user = DBUserModel(
         user_name = new_user.user_name,
         avatar_url = new_user.avatar_url,

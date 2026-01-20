@@ -1,4 +1,4 @@
-from constans import SQL_DB_URL
+from src.constans import SQL_DB_URL
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker

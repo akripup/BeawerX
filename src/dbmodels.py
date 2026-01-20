@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-from dbscripts import Base
+from src.dbscripts import Base
 
 class DBUserModel(Base): 
     __tablename__ = "users"
