@@ -1,10 +1,10 @@
-from src.dbmodels import Base
-from src.dbscripts import db_session, engine
+from dbmodels import Base
+from dbscripts import db_session, engine
 
-'''В этом файле описана логика главная логика 
-взаимодействия апи запросов, отправленных с front-а запросов и бд'''
+'''В этом файле описана главная логика 
+взаимодействия апи запросов, отправленных с front-а запросов и работы бд'''
 
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 # Создаем подключение к бд
 def get_db():

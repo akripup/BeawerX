@@ -13,33 +13,36 @@ app = FastAPI()
 
 
 @app.get("/api/feed")
-async def create_item():
+async def get_feed():
     return 
 
 #TODO возможно следует изменить формат даты
 @app.get("/api/search_post")
 async def search_post(author_name: Optional[str] = Query(None, description= 'Имя автора поста'),
                     creation_date: Optional[datetime] = Query(None, description= 'Дата публикации поста в формате dd.mm.YYYY', example="01.01.1991"),
-                    post_title:  Optional[str] = Query(None, description= 'Заголовок поста')
+                    post_title:  Optional[str] = Query(None, description= 'Заголовок поста'),
+                    db: Session = Depends(get_db)
                     ) -> List[PostModel]:
-    filtered_posts = []
-    for post in posts:
-        should_include = True
-        # Если пост не от этого автора - исключаем
-        if author_name and post.author.user_name != author_name:
-            should_include = False
-        # Если дата поста не совпадает - исключаем  
-        if creation_date and post.date != creation_date:
-            should_include = False 
-        # Если заголовок не содержит искомую строку - исключаем
-        if post_title and post_title.lower() not in post.title.lower():
-            should_include = False
-        # Если все проверки пройдены - добавляем пост
-        if should_include:
-            filtered_posts.append(post)
-    if filtered_posts:
-        return filtered_posts
-    raise HTTPException(status_code=404, detail='Пост не найден')
+    # Добавляем фильтры только если параметры переданы
+    query = db.query(DBPostModel)
+    
+    if author_name:
+        query = query.filter(DBUserModel.user_name.ilike(f"%{author_name}%"))
+    
+    if creation_date:
+        # Фильтр по точной дате (можно изменить на диапазон)
+        query = query.filter(DBPostModel.date == creation_date)
+    
+    if post_title:
+        query = query.filter(DBPostModel.title.ilike(f"%{post_title}%"))
+    
+    # Получаем ВСЕ подходящие посты
+    db_posts = query.all()
+
+    if db_posts is None:
+        raise HTTPException(status_code=404, detail= 'Пользователь не найден')
+    
+    return db_posts
 
 @app.post("/api/create_post", response_model=PostModel)
 async def create_post(new_post: PostCreate, db: Session = Depends(get_db)) -> PostModel:
@@ -71,16 +74,16 @@ async def create_user(new_user: UserCreate, db: Session = Depends(get_db)) -> Us
     db.refresh(db_user)
     return db_user
 
-#TODO
-@app.put("/api/edit_post")
-async def create_post(new_post: PostCreate) -> PostModel:
-    pass
-@app.put("/api/edit_user")
-async def create_post(new_post: PostCreate) -> PostModel:
-    pass
-@app.delete("/api/delete_post")
-async def create_post(new_post: PostCreate) -> PostModel:
-    pass
-@app.delete("/api/delete_user")
-async def create_post(new_post: PostCreate) -> PostModel:
-    pass
+# #TODO
+# @app.put("/api/edit_post")
+# async def create_post(new_post: PostCreate) -> PostModel:
+#     pass
+# @app.put("/api/edit_user")
+# async def create_post(new_post: PostCreate) -> PostModel:
+#     pass
+# @app.delete("/api/delete_post")
+# async def create_post(new_post: PostCreate) -> PostModel:
+#     pass
+# @app.delete("/api/delete_user")
+# async def create_post(new_post: PostCreate) -> PostModel:
+#     pass

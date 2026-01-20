@@ -1,1 +1,6 @@
-SQL_DB__URL = 'sqlite:///./notdb.db'
+import os
+from datetime import datetime
+DBUSERNAME = os.getenv('DBUSERNAME')
+DBPASSWORD = os.getenv('DBPASSWORD')
+DBNAME = os.getenv('DBNAME')
+SQL_DB_URL = f'mysql+pymysql://{DBUSERNAME}:{DBPASSWORD}@localhost/{DBNAME}'
