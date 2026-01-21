@@ -1,17 +1,27 @@
-// feed.js
-
-// Загрузка постов при открытии страницы
+// feed.js - Рыжая тема
 document.addEventListener('DOMContentLoaded', function() {
-    const username = localStorage.getItem('username') || 'Гость';
+    const username = localStorage.getItem('username');
     document.getElementById('usernameDisplay').textContent = username;
     
-    // Загрузка постов
     loadPosts();
+    setupFilters();
 });
 
-// Загрузка постов с сервера
+function setupFilters() {
+    document.getElementById('searchAuthor').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') searchPosts();
+    });
+    
+    document.getElementById('searchTitle').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') searchPosts();
+    });
+    
+    document.getElementById('sortDate').addEventListener('change', searchPosts);
+}
+
 async function loadPosts() {
     try {
+        showLoading();
         const token = localStorage.getItem('authToken');
         const response = await fetch('http://127.0.0.1:8001/feed', {
             headers: {
@@ -23,65 +33,45 @@ async function loadPosts() {
             const posts = await response.json();
             displayPosts(posts);
         } else {
-            showError('Ошибка загрузки постов');
+            showError('❌ Ошибка загрузки ленты');
         }
     } catch (error) {
         console.error('Ошибка:', error);
-        showError('Не удалось загрузить посты');
+        showError('🌐 Нет связи с сервером');
     }
 }
 
-// Отображение постов
-function displayPosts(posts) {
+function showLoading() {
     const container = document.getElementById('postsContainer');
-    
-    if (!posts || posts.length === 0) {
-        container.innerHTML = `
-            <div class="empty-message">
-                📭 Пока нет ни одного поста
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = posts.map(post => `
-        <div class="post-card">
-            <div class="post-header">
-                <div class="post-author">${escapeHtml(post.author || 'Аноним')}</div>
-                <div class="post-date">${formatDate(post.created_at)}</div>
-            </div>
-            
-            <div class="post-content">
-                ${escapeHtml(post.content || 'Нет описания')}
-            </div>
-            
-            <div class="post-footer">
-                <div class="post-price">${post.price ? escapeHtml(post.price) + ' ₽' : 'Цена не указана'}</div>
-                <div class="post-actions">
-                    <button class="bid-btn" onclick="makeBid(${post.id})">
-                        Сделать ставку
-                    </button>
-                </div>
-            </div>
+    container.innerHTML = `
+        <div class="loading-message">
+            <div style="font-size: 48px; margin-bottom: 20px;">🐾</div>
+            Загружаем бобровые аукционы...
         </div>
-    `).join('');
+    `;
 }
 
-// Поиск постов
 async function searchPosts() {
-    const searchTerm = document.getElementById('searchInput').value.trim();
-    const container = document.getElementById('postsContainer');
+    const author = document.getElementById('searchAuthor').value.trim();
+    const title = document.getElementById('searchTitle').value.trim();
+    const date = document.getElementById('searchDate').value;
+    const sort = document.getElementById('sortDate').value;
     
-    if (!searchTerm) {
-        container.innerHTML = '<div class="loading-message">🔍 Введите поисковый запрос</div>';
-        return;
-    }
-    
-    container.innerHTML = '<div class="loading-message">🔎 Поиск постов...</div>';
+    const filters = {};
+    if (author) filters.author_name = author;
+    if (title) filters.post_title = title;
+    if (date) filters.creation_date = date;
+    if (sort) filters.sort = sort;
     
     try {
+        showLoading();
         const token = localStorage.getItem('authToken');
-        const response = await fetch(`http://127.0.0.1:8001/feed/search?q=${encodeURIComponent(searchTerm)}`, {
+        
+        let url = 'http://127.0.0.1:8001/feed/search';
+        const params = new URLSearchParams(filters).toString();
+        if (params) url += '?' + params;
+        
+        const response = await fetch(url, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -92,9 +82,11 @@ async function searchPosts() {
             displayPosts(posts);
             
             if (posts.length === 0) {
+                const container = document.getElementById('postsContainer');
                 container.innerHTML = `
                     <div class="empty-message">
-                        🔍 По запросу "${escapeHtml(searchTerm)}" ничего не найдено
+                        <div style="font-size: 48px; margin-bottom: 20px;">🔍</div>
+                        По вашему запросу ничего не найдено
                     </div>
                 `;
             }
@@ -105,39 +97,85 @@ async function searchPosts() {
     }
 }
 
-// Сделать ставку (заглушка)
+function resetFilters() {
+    document.getElementById('searchAuthor').value = '';
+    document.getElementById('searchTitle').value = '';
+    document.getElementById('searchDate').value = '';
+    document.getElementById('sortDate').value = 'newest';
+    loadPosts();
+}
+
+function displayPosts(posts) {
+    const container = document.getElementById('postsContainer');
+    
+    if (!posts || posts.length === 0) {
+        container.innerHTML = `
+            <div class="empty-message">
+                <div style="font-size: 48px; margin-bottom: 20px;">🪵</div>
+                Пока нет ни одного поста
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = posts.map(post => `
+        <div class="post-card">
+            <div class="post-header">
+                <div class="post-author">${escapeHtml(post.author_name || post.author || 'Анонимный бобёр')}</div>
+                <div class="post-date">${formatDate(post.created_at || post.creation_date)}</div>
+            </div>
+            
+            <div class="post-title">${escapeHtml(post.title || post.post_title || 'Без названия')}</div>
+            
+            <div class="post-content">
+                ${escapeHtml(post.content || post.description || 'Нет описания')}
+            </div>
+            
+            <div class="post-footer">
+                <div class="post-actions">
+                    <button class="bid-btn" onclick="makeBid(${post.id})">
+                        🏷️ Ставка
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
 function makeBid(postId) {
-    alert(`Ставка на пост #${postId}\nФункция будет реализована позже`);
+    alert(`🏷️ Ставка на пост #${postId}\nФункция ставок в разработке!`);
 }
 
-// Форматирование даты
 function formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'long',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    if (!dateString) return 'Дата неизвестна';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch {
+        return dateString;
+    }
 }
 
-// Показать ошибку
 function showError(message) {
     const container = document.getElementById('postsContainer');
     container.innerHTML = `
         <div class="empty-message" style="color: #ff6b6b;">
-            ❌ ${escapeHtml(message)}
+            ${escapeHtml(message)}
         </div>
     `;
 }
 
-// Экранирование HTML для безопасности
 function escapeHtml(text) {
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-// Обновление постов каждые 30 секунд
-setInterval(loadPosts, 30000);
+// Автообновление каждые 60 секунд
+setInterval(loadPosts, 60000);

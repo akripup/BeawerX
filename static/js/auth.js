@@ -155,9 +155,9 @@ async function register() {
         setTimeout(() => {
             showLoginForm();
             // Заполняем поле логина в форме входа
-            const loginUsernameInput = document.getElementById('loginUsername');
-            if (loginUsernameInput) {
-                loginUsernameInput.value = data.login;
+            const loginInput = document.getElementById('loginUsername');
+            if (loginInput) {
+                loginInput.value = data.login;
             }
         }, 3000);
         
@@ -193,20 +193,20 @@ async function register() {
 async function login() {
     console.log('=== НАЧАЛО ВХОДА ===');
     
-    const usernameInput = document.getElementById('loginUsername');
+    const loginInput = document.getElementById('loginUsername');
     const passwordInput = document.getElementById('loginPassword');
     
-    if (!usernameInput || !passwordInput) {
+    if (!loginInput || !passwordInput) {
         console.error('Не найдены поля формы входа');
         return;
     }
     
-    const username = usernameInput.value.trim();
+    const my_login = loginInput.value.trim();
     const password = passwordInput.value;
     const button = document.querySelector('#loginForm button.auth-btn');
     
     // Валидация
-    if (!username || !password) {
+    if (!my_login || !password) {
         showMessage('loginMessage', '❌ Заполните все поля', 'error');
         return;
     }
@@ -220,7 +220,7 @@ async function login() {
     button.disabled = true;
     button.textContent = '⏳ Вход...';
     
-    showMessage('loginMessage', `⏳ Входим как ${username}...`, 'info');
+    showMessage('loginMessage', `⏳ Входим как ${my_login}...`, 'info');
     
     try {
         // Используем эндпоинт аутентификации
@@ -231,7 +231,7 @@ async function login() {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                login: username,
+                login: my_login,
                 user_password: password
             })
         });
@@ -261,10 +261,11 @@ async function login() {
         if (data.access_token) {
             localStorage.setItem('token', data.access_token);
             localStorage.setItem('isAuthenticated', 'true');
+            localStorage.setItem('username', data.my_username);
             
             showMessage('loginMessage', 
                 `✅ <strong>Вход выполнен успешно!</strong><br>
-                 Добро пожаловать, ${username}!`, 
+                 Добро пожаловать, ${data.username}!`, 
                 'success');
             
             // Перенаправляем на главную страницу через 2 секунды

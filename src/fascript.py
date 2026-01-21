@@ -121,7 +121,8 @@ async def login_user(
     if db_user is None:
         raise HTTPException(status_code=404, detail= 'Пользователь не найден')
     
-    access_token = {'access_token': login + '+' + password}
+    access_token = {'access_token': login + '+' + password,
+                    'my_user_name': db_user.user_name}
     
     return access_token
 
