@@ -1,6 +1,6 @@
 '''В этом модуле описана логика обработки api запросов'''
 from fastapi.middleware.cors import CORSMiddleware
-from src.famodels import PostModel, UserModel, PostCreate, UserCreate
+from src.famodels import PostModel, UserModel, PostCreate, UserCreate, UserLogin
 from datetime import datetime
 from typing import Optional, List
 from fastapi import FastAPI, HTTPException, Query, Depends
@@ -13,13 +13,20 @@ app = FastAPI()
 #Добавить аннотации для макс длинны символов
 
 
+# Настройка CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000"],  # Адреса фронтенда
+    allow_origins=["*", "null"],  # Разрешить все источники (для разработки)
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Разрешить все методы
+    allow_headers=["*"],  # Разрешить все заголовки
+    expose_headers=["*"]
 )
+
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
 
 # получаем ленту новостей
 @app.get("/api/feed")
@@ -44,7 +51,7 @@ async def search_post(author_name: Optional[str] = Query(None, description= 'И�
                     db: Session = Depends(get_db)
                     ) -> List[PostModel]:
     # Добавляем фильтры только если параметры переданы
-    query = db.query(DBPostModel)
+    query = db.query(DBPostModel).join(DBUserModel, DBPostModel.author_id == DBUserModel.id)
     
     if author_name:
         query = query.filter(DBUserModel.user_name.ilike(f"%{author_name}%"))
@@ -67,9 +74,10 @@ async def search_post(author_name: Optional[str] = Query(None, description= 'И�
 @app.post("/api/create_post", response_model=PostModel)
 async def create_post(new_post: PostCreate,
                     db: Session = Depends(get_db)) -> PostModel:
-    db_user = db.query(DBUserModel).filter(DBUserModel.login == new_post.author_login).first()
+    db_user = db.query(DBUserModel).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail= 'Пользователь не найден')
+    
     db_post = DBPostModel(
     author_id=db_user.id,   
     title=new_post.title,
@@ -86,14 +94,34 @@ async def create_user(new_user: UserCreate,
                     db: Session = Depends(get_db)) -> UserModel:
     db_user = DBUserModel(
         user_name = new_user.user_name,
-        avatar_url = new_user.avatar_url,
         login = new_user.login,
+        user_password = new_user.user_password,
         age = new_user.age,
-        life_status = new_user.life_status
     )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    return db_user
+
+#TODO добавить try и ->
+@app.post("/api/login", response_model=UserModel)  # Ожидается ОДИН пользователь
+async def login_user(
+    logining_user: UserLogin,
+    db: Session = Depends(get_db)
+):
+    password = logining_user.user_password
+    login = logining_user.login
+
+    # Ищем пользователя по точному совпадению логина и пароля
+    # (обычно логин должен быть уникальным)
+    db_user = db.query(DBUserModel).filter(
+        DBUserModel.login == login,
+        DBUserModel.user_password == password
+    ).first()  # Используем first() вместо all()
+
+    if db_user is None:
+        raise HTTPException(status_code=404, detail= 'Пользователь не найден')
+    
     return db_user
 
 # #TODO

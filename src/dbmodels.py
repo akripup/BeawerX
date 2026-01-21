@@ -6,6 +6,7 @@ class DBUserModel(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     user_name = Column(String, index=True)
+    user_password = Column(String, index=True)
     avatar_url = Column(String)
     login = Column(String, index=True)
     age = Column(Integer)
