@@ -1,7 +1,7 @@
 // Проверяем авторизацию при загрузке любой страницы
 document.addEventListener('DOMContentLoaded', function() {
     // Страницы, которые не требуют авторизации
-    const publicPages = ['auth.html', 'index.html'];
+    const publicPages = ['auth.html'];
     const currentPage = window.location.pathname.split('/').pop();
     
     // Если это не публичная страница и пользователь не авторизован

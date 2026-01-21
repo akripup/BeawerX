@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лента - CoinAuction</title>
+    <link rel="stylesheet" href="../static/css/feed.css">
+</head>
+<script src="../static/js/auth-check.js"></script>
+<body>
+    <div class="container">
+        <!-- Шапка -->
+        <div class="header">
+            <div class="logo">CoinAuction</div>
+            <div class="user-section">
+                <div class="welcome-text">
+                    Добро пожаловать, <span class="username" id="usernameDisplay"></span>!
+                </div>
+                <button class="logout-btn" onclick="logout()">Выйти</button>
+            </div>
+        </div>
+        
+        <!-- Панель поиска -->
+        <div class="search-panel">
+            <div class="search-title">Поиск постов</div>
+            <div class="search-form">
+                <input type="text" 
+                       class="search-input" 
+                       id="searchInput" 
+                       placeholder="Введите ключевые слова для поиска...">
+                <button class="search-btn" onclick="searchPosts()">Найти</button>
+            </div>
+        </div>
+        
+        <!-- Лента постов -->
+        <h2 class="feed-title">Лента аукционов 🏷️</h2>
+        
+        <div class="posts-container" id="postsContainer">
+            <!-- Посты будут загружаться сюда -->
+            <div class="loading-message">⏳ Загрузка постов...</div>
+        </div>
+        
+        <!-- Футер -->
+        <div class="footer">
+            CoinAuction © 2024. Все права защищены.
+        </div>
+    </div>
+
+    <script src="../static/js/auth.js"></script>
+    <script src="../static/js/feed.js"></script>
+</body>
+</html>

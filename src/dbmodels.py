@@ -16,7 +16,7 @@ class DBPostModel(Base):
     __tablename__ = "posts"
     id = Column(Integer, primary_key=True, index=True)
     author_id = Column(Integer, ForeignKey('users.id'), index=True)
-    author = relationship("DBUserModel") #, back_populates=True
+    author = relationship("DBUserModel")
     date = Column(DateTime, index=True)
     title = Column(String, index=True)
     body = Column(String)

@@ -103,8 +103,8 @@ async def create_user(new_user: UserCreate,
     db.refresh(db_user)
     return db_user
 
-#TODO добавить try и ->
-@app.post("/api/login", response_model=UserModel)  # Ожидается ОДИН пользователь
+#TODO добавить try и -> и поменять respince model на новый класс
+@app.post("/api/login")  # Ожидается ОДИН пользователь
 async def login_user(
     logining_user: UserLogin,
     db: Session = Depends(get_db)
@@ -113,16 +113,17 @@ async def login_user(
     login = logining_user.login
 
     # Ищем пользователя по точному совпадению логина и пароля
-    # (обычно логин должен быть уникальным)
     db_user = db.query(DBUserModel).filter(
         DBUserModel.login == login,
         DBUserModel.user_password == password
-    ).first()  # Используем first() вместо all()
+    ).first() 
 
     if db_user is None:
         raise HTTPException(status_code=404, detail= 'Пользователь не найден')
     
-    return db_user
+    access_token = {'access_token': login + '+' + password}
+    
+    return access_token
 
 # #TODO
 # @app.put("/api/edit_post")

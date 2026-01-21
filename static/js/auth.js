@@ -260,7 +260,7 @@ async function login() {
         // Сохраняем токен в localStorage
         if (data.access_token) {
             localStorage.setItem('token', data.access_token);
-            localStorage.setItem('username', username);
+            localStorage.setItem('isAuthenticated', 'true');
             
             showMessage('loginMessage', 
                 `✅ <strong>Вход выполнен успешно!</strong><br>
@@ -269,7 +269,7 @@ async function login() {
             
             // Перенаправляем на главную страницу через 2 секунды
             setTimeout(() => {
-                window.location.href = 'index.html';
+                window.location.href = '../templates/feed.html';
             }, 2000);
         } else {
             throw new Error('Токен не получен');
@@ -303,14 +303,14 @@ function validateRegistrationForm(name, login, age, password) {
     }
     
     // Проверка длины логина
-    if (login.length < 3) {
-        showMessage('registerMessage', '❌ Логин должен содержать минимум 3 символа', 'error');
+    if (login.length < 2) {
+        showMessage('registerMessage', '❌ Логин должен содержать минимум 2 символа', 'error');
         return false;
     }
     
     // Проверка пароля
-    if (password.length < 6) {
-        showMessage('registerMessage', '❌ Пароль должен содержать минимум 6 символов', 'error');
+    if (password.length < 2) {
+        showMessage('registerMessage', '❌ Пароль должен содержать минимум 2 символов', 'error');
         return false;
     }
     
@@ -344,21 +344,3 @@ function hideMessages() {
     if (loginMsg) loginMsg.style.display = 'none';
     if (registerMsg) registerMsg.style.display = 'none';
 }
-
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', async function() {
-    console.log('Страница авторизации загружена');
-    
-    if (!apiAvailable) {
-        const footer = document.querySelector('.footer');
-        if (footer) {
-            const warning = document.createElement('div');
-            warning.className = 'api-warning';
-            warning.innerHTML = `⚠️ API недоступен! Проверьте:<br>
-                                1. Запущен ли FastAPI сервер<br>
-                                2. Правильный ли порт: ${API_BASE_URL}<br>
-                                3. Проверьте консоль сервера`;
-            footer.appendChild(warning);
-        }
-    }
-});
