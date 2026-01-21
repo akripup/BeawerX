@@ -2,7 +2,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const username = localStorage.getItem('username');
     document.getElementById('usernameDisplay').textContent = username;
-    
     loadPosts();
     setupFilters();
 });
@@ -22,12 +21,7 @@ function setupFilters() {
 async function loadPosts() {
     try {
         showLoading();
-        const token = localStorage.getItem('authToken');
-        const response = await fetch('http://127.0.0.1:8001/feed', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        const response = await fetch('http://127.0.0.1:8001/api/feed');
         
         if (response.ok) {
             const posts = await response.json();
@@ -67,7 +61,7 @@ async function searchPosts() {
         showLoading();
         const token = localStorage.getItem('authToken');
         
-        let url = 'http://127.0.0.1:8001/feed/search';
+        let url = 'http://127.0.0.1:8001/api/search_post';
         const params = new URLSearchParams(filters).toString();
         if (params) url += '?' + params;
         
