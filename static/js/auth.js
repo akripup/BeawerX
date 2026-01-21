@@ -345,33 +345,9 @@ function hideMessages() {
     if (registerMsg) registerMsg.style.display = 'none';
 }
 
-// Функция проверки доступности API
-async function checkApiStatus() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/`, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-        });
-        
-        if (response.ok) {
-            console.log('✅ API доступен');
-            return true;
-        } else {
-            console.warn('⚠️ API ответил с ошибкой:', response.status);
-            return false;
-        }
-    } catch (error) {
-        console.error('❌ API недоступен:', error.message);
-        return false;
-    }
-}
-
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Страница авторизации загружена');
-    
-    // Проверяем доступность API
-    const apiAvailable = await checkApiStatus();
     
     if (!apiAvailable) {
         const footer = document.querySelector('.footer');
