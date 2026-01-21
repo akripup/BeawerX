@@ -361,17 +361,4 @@ document.addEventListener('DOMContentLoaded', async function() {
             footer.appendChild(warning);
         }
     }
-    
-    // Добавляем обработчики клавиш
-    document.addEventListener('keydown', function(e) {
-        // Enter в форме входа
-        if (e.target.id === 'loginPassword' && e.key === 'Enter') {
-            login();
-        }
-        
-        // Enter в форме регистрации (пароль или возраст)
-        if ((e.target.id === 'registerPassword' || e.target.id === 'registerAge') && e.key === 'Enter') {
-            register();
-        }
-    });
 });
