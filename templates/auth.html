@@ -72,32 +72,7 @@
             Для работы требуется запущенный FastAPI сервер на 
             <a href="http://127.0.0.1:8001" target="_blank">http://127.0.0.1:8001</a>
         </div>
-    </div>
-
-    <script>        
-        // Простые функции переключения форм
-        function showLoginForm() {
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('registerForm').style.display = 'none';
-            
-            // Обновляем активную кнопку
-            document.querySelectorAll('.switch-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelectorAll('.switch-btn')[0].classList.add('active');
-        }
-        
-        function showRegisterForm() {
-            document.getElementById('registerForm').style.display = 'block';
-            document.getElementById('loginForm').style.display = 'none';
-            
-            // Обновляем активную кнопку
-            document.querySelectorAll('.switch-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelectorAll('.switch-btn')[1].classList.add('active');
-        }
-    </script>
+    </div>  
     <script src="../static/js/auth.js"></script>
 </body>
 </html>

@@ -370,15 +370,6 @@ async function checkApiStatus() {
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Страница авторизации загружена');
     
-    // Удаляем простые функции из HTML
-    const scriptTags = document.querySelectorAll('script');
-    scriptTags.forEach(script => {
-        if (script.textContent.includes('showLoginForm') || 
-            script.textContent.includes('showRegisterForm')) {
-            script.remove();
-        }
-    });
-    
     // Проверяем доступность API
     const apiAvailable = await checkApiStatus();
     
